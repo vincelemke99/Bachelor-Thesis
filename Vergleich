@@ -1,0 +1,7 @@
+SELECT DISTINCT id
+FROM   `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity` as o
+WHERE EXISTS (
+    SELECT 1
+    FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead` l
+    WHERE o.id = l.id
+);

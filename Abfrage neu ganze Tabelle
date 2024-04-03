@@ -1,0 +1,79 @@
+SELECT
+  a.last_name,
+  a.first_name,
+  a.phone,
+  a.mobile_phone,
+  a.is_deleted,
+  a.created_date,
+  a.bundesland_c,
+  a.ort_c,
+  a.plz_c,
+  a.strasse_c,
+  a.bitte_rufen_sie_mich_zur_ck_c,
+  a.bitte_beratungstermin_vereinbaren_c,
+  a.geschlecht_c,
+
+  b.email,
+  b.lead_source,
+  b.status,
+  b.is_converted,
+  b.is_newsletter_c,
+  b.anmeldung_veranstaltung_c,
+  b.newsletter_olp_c,
+  b.bitte_informationsmaterial_senden_c,
+  b.e_mail_adresse_c,
+  b.produktinteresse_c,
+  b.e_mail_problem_c,
+  b.werbestatus_c,
+  b.fake_lead_c,
+  b.land_c,
+  b.standort_c,
+  b.studienfach_c,
+  b.studienort_c,
+  b.website,
+
+
+  c.lead_c,
+  c.produkt_c,
+  c.studium_begimm_c,
+  c.fachbereich_c,
+  c.produktname_c,
+  c.zeitraum_c,
+  c.infomaterial_c,
+  c.produkt_abschluss_c,
+  c.produkt_format_c,
+  c.geraeteinfo_c,
+
+  d.zeitraum_c,
+  d.art_der_ausbildung_c,
+  d.titel_abschluss_c,
+
+  e.amount,
+  e.probability,
+  e.is_closed,
+  e.is_won,
+  e.unter_vorbehalt_c,
+  e.vertrag_geschickt_c,
+  e.vertrag_akzeptiert_c,
+  e.produktname_c,
+  e.produktcode_c,
+  e.produkt_c
+ 
+
+
+FROM 
+  `cognos-bildungsgruppe-ag.dlt_salesforce.contact` as a
+
+LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce.lead` as b
+  ON a.id = b.kontakt_c
+
+LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_interest` as c
+  ON b.id = c.lead_c
+
+LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_2` as d
+  ON c.produkt_c = d.id
+
+LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.opportunity` as e
+  ON a.id = e.kontakt_c
+  AND d.id = e.produkt_c
+

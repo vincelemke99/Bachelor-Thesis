@@ -1,0 +1,95 @@
+With campaign as(
+SELECT
+  c.id as id,
+  c.type as type,
+  c.status as status,
+  c.start_date as start_date,
+  c.end_date as end_date,
+  c.name as name,
+  c.number_of_leads as number_of_leads,
+  c.number_of_converted_leads as number_of_converted_leads,
+  c.standort_c as standort_c,
+  c.anzahl_kampagnenmitglieder_c as anzahl_kampagnenmitglieder_c,
+  c.anzeigen_messeformular_c as anzeigen_messeformular_c,
+  c.anzeigen_kontaktformular_c as nzeigen_kontaktformular_c,
+  c.kampagne_voll_besetzt_c as kampagne_voll_besetzt_c,
+  c.bereich_kontaktformular_calculated_c as  bereich_kontaktformular_calculated_c,
+  c.display_description_kontaktformular_c as display_description_kontaktformular_c,
+  c.kampagne_voll_c as kampagne_voll_c,
+  c.anzeigen_messeformular_amd_c as anzeigen_messeformular_amd_c,
+  c.website_anzeige_c as website_anzeige_c,
+  c.online_veranstaltung_c as online_veranstaltung_c
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.campaign` as c
+),
+lead as(
+      SELECT
+        l.id as id,
+        l.lead_source,
+        l.status as status,
+        l.has_opted_out_of_email as as_opted_out_of_email,
+        l.sfga_web_source_c as sfga_web_source_c,
+        l.bitte_rufen_sie_mich_zur_ck_c as bitte_rufen_sie_mich_zur_ck_c,
+        l.bitte_beratungstermin_vereinbaren_c as bitte_beratungstermin_vereinbaren_c,	
+        l.z_tage_seit_letzter_nderung_c as z_tage_seit_letzter_nderung_c,
+        l.is_newsletter_c as is_newsletter_c,
+        l.bitte_informationsmaterial_senden_c asbitte_informationsmaterial_senden_c,
+        l.lead_qualitaet_c as lead_qualitaet_c,
+        l.werbestatus_c as werbestatus_c,
+        l.lead_quelle_publisher_c as lead_quelle_publisher_c,
+        l.email_bounced_reason as email_bounced_date,
+      FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead` as l
+
+  ),
+  opportunity as(
+  SELECT
+    o.id as id,
+    o.is_deleted as is_deleted,
+    o.stage_name as stage_name,
+    o.probability as probability,
+    o.lead_source as lead_source,
+    o.is_closed as is_closed,
+    o.forecast_category_name as forecast_category_name,
+    o.push_count as push_count,
+    o.has_open_activity as has_open_activity,
+    o.has_overdue_task as has_overdue_task,
+    o.unter_vorbehalt_c as unter_vorbehalt_c,
+    o.widerruf_konvertiert_c as widerruf_konvertiert_c,
+    o.produktname_c as produktname_c,
+    o.z_opp_status_c as z_opp_status_c,
+    o.flow_duale_ausbildung_c as flow_duale_ausbildung_c,
+    o.werbefreigabe_c as werbefreigabe_c,
+    o.kontakt_nb_anzahl_angenommene_anrufe_c as kontakt_nb_anzahl_angenommene_anrufe_c,
+   FROM `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity` as o
+  )
+SELECT
+  #l.*,
+  c.id,
+  #o.*,
+FROM lead l
+LEFT JOIN campaign c  ON l.id = c.id
+LEFT JOIN opportunity o ON l.id = o.id
+  WHERE c.id != ""
+
+ 
+
+
+
+
+
+
+    
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
