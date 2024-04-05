@@ -1,0 +1,71 @@
+WITH lead AS (
+  SELECT
+    id as lead_id,
+    name,
+    email,
+    kontakt_c as kontakt_id,
+    #produktinteresse_c
+   
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead`
+),
+product_interest AS (
+  SELECT
+    lead_c as lead_id,
+    produkt_c as produkt_id,
+    art_der_anfrage_c AS product_interest_type,
+    produkt_produktcode_c as produkt_code
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.product_interest`
+),
+product AS (
+  SELECT
+    produktcode_c,
+    
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.product_2`
+),
+opportunity AS (
+  SELECT
+    kontakt_c as kontakt_id,
+    produkt_c as produkt_id,
+   IF( stage_name like "%70%",true, false) as has_contract
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity`
+), 
+LEFT_JOIN_LEAD_PI aS (
+  SELECT 
+    lead.lead_id,
+    name,
+    email,
+    lead.kontakt_id,
+    product_interest.produkt_id,
+    product_interest_type,
+    produkt_code
+  FROM lead 
+  LEFT JOIN product_interest  
+  ON lead.lead_id = product_interest.lead_id
+  GROUP BY 
+  1,2,3,4,5,6,7
+),
+
+
+LEFT_JOIN_LEAD_PI_OPPOrtuinity_match as(
+  SELECT
+    lead_id,
+    name,
+    email,
+    lead_pi.kontakt_id,
+    lead_pi.produkt_id,
+    produkt_code,
+    IF(lead_pi.produkt_id = opportunity.produkt_id, true, false) as is_converted,
+    has_contract
+  FROM LEFT_JOIN_LEAD_PI  as lead_pi
+  LEFT JOIN opportunity 
+  ON  lead_pi.kontakt_id = opportunity.kontakt_id 
+   GROUP BY 
+  1,2,3,4,5,6,7,8
+)
+SELECT
+  *
+FROM
+LEFT_JOIN_LEAD_PI_OPPOrtuinity_match
+
+
+
