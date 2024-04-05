@@ -1,20 +1,19 @@
 WITH lead AS (
   SELECT
     id,
-    name AS name,
-    email AS email,
-    kontakt_c AS kontakt,
-    produktinteresse_c AS produktinteresse,
-    produktcode_c AS produktcode,
-    produkt_datensatztyp_id_c AS produkt_id
-  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead` 
+    name,
+    email,
+    kontakt_c,
+    produktinteresse_c,
+    produktcode_c
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead`
 ),
 product_interest AS (
   SELECT
     lead_c,
     produkt_c,
     art_der_anfrage_c AS product_interest_type
-  FROM `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_interest` 
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_interest`
 ),
 opportunity AS (
   SELECT
@@ -23,26 +22,25 @@ opportunity AS (
     unter_vorbehalt_c,
     vertrag_akzeptiert_c,
     widerruf_konvertiert_c
-  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity` 
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity`
 )
+
 SELECT
   l.*,
-  pi.produkt_c,
+  pi.produkt_c AS pi_produkt_c,
   pi.product_interest_type,
-  op.unter_vorbehalt_c,
-  op.vertrag_akzeptiert_c,
-  op.widerruf_konvertiert_c,
+  COALESCE(op.vertrag_akzeptiert_c, o.vertrag_akzeptiert_c) AS vertrag_akzeptiert_c,
+  COALESCE(op.unter_vorbehalt_c, o.unter_vorbehalt_c) AS unter_vorbehalt_c,
+  COALESCE(op.widerruf_konvertiert_c, o.widerruf_konvertiert_c) AS widerruf_konvertiert_c,
   CASE
-    WHEN l.kontakt = op.kontakt_c AND pi.produkt_c = op.produkt_c THEN 'true'
-    WHEN l.kontakt = op.kontakt_c AND pi.produkt_c != op.produkt_c THEN 'false'
-    ELSE "null"
+    WHEN op.produkt_c IS NOT NULL THEN 'true'
+    WHEN o.produkt_c IS NOT NULL THEN 'false'
+    ELSE 'null'
   END AS is_converted
 FROM lead l
 INNER JOIN product_interest pi 
-  ON l.id = pi.lead_c
+ON l.id = pi.lead_c
 LEFT JOIN opportunity op 
-  ON l.kontakt = op.kontakt_c
-  AND pi.produkt_c = op.produkt_c
+ON l.kontakt_c = op.kontakt_c AND pi.produkt_c = op.produkt_c
 LEFT JOIN opportunity o 
-  ON l.kontakt = o.kontakt_c
-  AND pi.produkt_c != o.produkt_c
+ON l.kontakt_c = o.kontakt_c AND pi.produkt_c != o.produkt_c
