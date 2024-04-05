@@ -1,55 +1,129 @@
 SELECT  
-  a.id 
+  a.id,
+  a.is_deleted,
+  a.account_id,
   a.kontakt_id_c,
   a.name,
+  a.has_opted_out_of_email,
+  a.has_opted_out_of_fax,
+  a.do_not_call,
+  a.created_date,
+  a.last_modified_by_id,
+  a.is_email_bounced,
+  a.tage_seit_letzter_nderung_c,
+  a.ort_c,
+  a.bitte_rufen_sie_mich_zur_ck_c,
+  a.bitte_beratungstermin_vereinbaren_c,
+  a.brief_opt_out_c,
+  a.land_c,
+  a.geschlecht_c,
+  a.versicherung_c,
+  a.can_apply_c,
+  a.lead_erstellt_c,
+  a.alumni_newsletter_c,
+  a.e_mail_adresse_id_c,
   a.email,
   a.lead_source,
+  a.lead_quelle_detail_c,
+  a.lead_qualitaet_c,
+  a.newsletter_c,
+  a.einzugserm_chtigung_vorhanden_c,
+  a.berufsausbildung_vohanden_c,
+  a.accept_data_policy_c,
+  a.studienfach_c,
+  a.studiengang_c,
+  a.nb_erster_anruf_c,
+  a.lead_clearing_lead_source_c,
+  a.lead_clearing_last_lead_source_detail_c,
+  a.lead_clearing_created_date_c,
+
   
-  b.id 
-  b.status 
+  b.id, 
+  b.status, 
   b.is_converted,
-  b.produktcode_c 
+  b.do_not_call,
+  b.produktcode_c,
+  b.is_newsletter_c,
+  b.geschlecht_c,
+  b.email_bounced_reason,
+  b.email_bounced_date,
+  b.campus_leads_score_c,
+  b.campus_leads_beschreibung_c,
+  b.campus_leads_empfehlung_c,
+  b.campus_leads_kategorie_c,
+  b.campus_leads_status_c,
+  b.geburtsdatum_c,
+  b.letzte_lead_quelle_details_c,
   
-  c.produkt_c 
+   c.id,
+  c.is_deleted,
+  c.produkt_c,
+  c.standort_c,
+  c.fachbereich_c,
+  c.studium_beginn_c,
+  c.produktname_c,
+  c.zeitraum_c,
+  c.email_autoantwort_ausloesen_c,
+  c.produktcode_mit_zeit_del_c, 
+  c.produkt_aktiv_c,
+  c.gruppe_c,
+  c.lead_order_id_c,
+  c.lead_quelle_c,
+  c.produkt_bewerbung_bis_datum_c,
+  c.versand_broschuere_c,
+  c.lead_status_c,
+  c.produkt_zeitraum_c,
   c.produkt_id18_c,
-  c.kontakt_c 
+  c.prioritaet_c,
+  c.lead_is_converted_c,
+  c.lead_nb_anzahl_angenommene_anrufe_c,
+  c.lead_nb_anzahl_nicht_angenommene_anrufe_c,
+  c.lead_id_c,produkt_abschluss_c,
+  c.produkt_format_c,
+  c.kontakt_c,
+  c.status_vertrieb_c,
+  c.nb_anzahl_angenommene_anrufe_c,
+  c.nb_anzahl_nicht_angenommene_anrufe_c,
+  c.letzter_bounce_c,
+  c.letzter_bounce_datum_c,
   
-  e.id AS opportunity_id,
-  e.stage_name,
-  e.amount,
-  e.probability,
-  e.close_date,
-  e.lead_source AS opportunity_lead_source,
+ # e.id AS opportunity_id,
+ # e.stage_name,
+ # e.amount,
+ # e.probability,
+  #e.close_date,
+ # e.lead_source AS opportunity_lead_source,
   
-  d.id AS product_id,
+  d.id,
   d.is_active,
   d.is_deleted,
   d.is_archived,
-  d.fachbereich_c AS product_fachbereich,
-  d.standort_c AS product_standort,
-  d.zeitraum_c AS product_zeitraum,
+  d.fachbereich_c,
+  d.standort_c,
+  d.zeitraum_c,
   d.semester_produkt_c,
-  d.studium_beginn_datum_c AS product_studium_beginn,
-  d.bewerbung_bis_datum_c AS product_bewerbung_bis,
-  d.art_der_ausbildung_c AS product_art_der_ausbildung,
-  d.titel_abschluss_c AS product_titel_abschluss,
-  d.produktcode_c AS product_produktcode,
-  d.studiendauer_monate_c AS product_studiendauer_monate,
-  d.semesterbeitrag_c AS product_semesterbeitrag,
-  d.produktcode_nachfolgeprodukt_c AS product_nachfolgeprodukt
+  d.studium_beginn_datum_c,
+  d.bewerbung_bis_datum_c,
+  d.art_der_ausbildung_c,
+  d.titel_abschluss_c,
+  d.produktcode_c,
+  d.studiendauer_monate_c,
+  d.semesterbeitrag_c,
+  d.produktcode_nachfolgeprodukt_c
 
 FROM 
   `cognos-bildungsgruppe-ag.dlt_salesforce.contact` as a
 
-LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce.lead` as b
-  ON a.id = b.lead
+INNER JOIN `cognos-bildungsgruppe-ag.dlt_salesforce.lead` as b
+  ON a.id = b.kontakt_c
 
-LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_interest` as c
-  ON b.id = c.id
-LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_2` as d
-  ON c.id = d.id
-LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.opportunity` as e
-  ON a.id = e.id
+INNER JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_interest` as c
+  ON b.id = c.lead_c
+INNER JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_2` as d
+  ON c.produkt_c = d.id
+#LEFT JOIN `cognos-bildungsgruppe-ag.dlt_salesforce_staging.opportunity` as e
+  #ON a.id = e.kontakt_c
+  #AND d.id = e.produkt_c
 
 
 
