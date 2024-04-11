@@ -59,7 +59,7 @@ lead as(
     o.flow_duale_ausbildung_c as flow_duale_ausbildung_c,
     o.werbefreigabe_c as werbefreigabe_c,
     o.kontakt_nb_anzahl_angenommene_anrufe_c as kontakt_nb_anzahl_angenommene_anrufe_c,
-   FROM `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity` as o
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity` as o
   )
 SELECT
   #l.*,
