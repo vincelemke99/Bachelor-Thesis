@@ -2,8 +2,11 @@ WITH lead AS (
   SELECT
     id as lead_id,
     date(created_date) as date,
+    lead_source,
+    lead_quelle_detail_c as lead_quelle,
     name,
     email,
+    SPLIT(email, '@')[SAFE_OFFSET(1)] as domain,
     kontakt_c as kontakt_id,
     geschlecht_c as geschlecht,
     produktinteresse_c
@@ -29,7 +32,8 @@ product_interest AS (
 product AS (
   SELECT
     id,
-    produktcode_c as produkt_code_p,    
+    produktcode_c as produkt_code_p, 
+    gebuehr_c   
   FROM `cognos-bildungsgruppe-ag.dlt_salesforce.product_2`
 ),
 opportunity AS (
@@ -46,6 +50,9 @@ LEFT_JOIN_LEAD_PI aS (
     name,
     geschlecht,
     email,
+    domain,
+    lead_source,
+    lead_quelle,
     lead.kontakt_id,
     product_interest.produkt_id,
     produktinteresse_c,
@@ -56,12 +63,12 @@ LEFT_JOIN_LEAD_PI aS (
     produkt_standort,
     produkt_fachbereich,
     produkt_name,
-    studium_beginn,
+    studium_beginn
   FROM lead 
   LEFT JOIN product_interest  
   ON lead.lead_id = product_interest.lead_id
   GROUP BY 
-  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
 ),
 LEFT_JOIN_LEAD_PI_PRODUCT_MATCH as(
 SELECT
@@ -69,7 +76,10 @@ SELECT
     date,
     name,
     email,
+    domain,
     geschlecht,
+    lead_source,
+    lead_quelle,
     lead_pi.kontakt_id,
     lead_pi.produkt_id,
     produkt_code_pl,
@@ -88,7 +98,7 @@ SELECT
   ON  lead_pi.produkt_id = product.id
   AND product.produkt_code_p IS NOT NULL
   GROUP BY 
-  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
+  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21
 ),
 
 LEFT_JOIN_LEAD_PI_P_OPPORTUNITY_MATCH as(
@@ -97,7 +107,10 @@ LEFT_JOIN_LEAD_PI_P_OPPORTUNITY_MATCH as(
     lead_id,
     name,
     email,
+    domain,
     geschlecht,
+    lead_source,
+    lead_quelle,
     lead_pi_p.kontakt_id,
     lead_pi_p.produkt_id,
     produkt_code_pl,
@@ -109,12 +122,12 @@ LEFT_JOIN_LEAD_PI_P_OPPORTUNITY_MATCH as(
     studium_beginn,
     product_interest_type,
     IF(lead_pi_p.produkt_id = opportunity.produkt_id, true, false) as is_converted,
-    has_contract
+    IF(has_contract is null, false, has_contract) as has_contract
   FROM LEFT_JOIN_LEAD_PI_PRODUCT_MATCH  as lead_pi_p
   LEFT JOIN opportunity 
   ON  lead_pi_p.kontakt_id = opportunity.kontakt_id 
    GROUP BY 
-  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 )
 
 SELECT
@@ -123,7 +136,7 @@ FROM
 LEFT_JOIN_LEAD_PI_P_OPPORTUNITY_MATCH
 WHERE date BETWEEN '2022-01-01' AND '2024-01-01'
 AND produkt_id IS NOT NULL
-
+ 
 
 
 
