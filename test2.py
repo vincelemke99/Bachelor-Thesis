@@ -13,8 +13,8 @@ def remove_columns_from_csv(input_file, output_file, columns_to_remove):
 
 
 # Example usage:
-input_file = 'trainings_data.csv' # Path to the input CSV file
-output_file = 'trainings_data3.csv'  # Path to the output CSV file
-columns_to_remove = ['name', 'email', 'produkt_code_pl']  # List of columns to remove
+input_file = 'trainings_data_neu.csv' # Path to the input CSV file
+output_file = 'trainings_data_neu_bereinigt.csv'  # Path to the output CSV file
+columns_to_remove = ['name', 'email', 'produkt_code_pl', 'lead_id', 'lead_quelle', "kontakt_id", "produkt_id"  ]  # List of columns to remove
 
 remove_columns_from_csv(input_file, output_file, columns_to_remove)

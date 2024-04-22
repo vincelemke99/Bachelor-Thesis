@@ -4,44 +4,72 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 import xgboost as xgb
 from sklearn.metrics import accuracy_score, classification_report, mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
 
+#pd.set_option('display.max_rows', None)  # Replace None with a number if you want to limit to a specific count
+pd.set_option('display.max_columns', None)  # Adjusts how many columns are shown
+pd.set_option('display.expand_frame_repr', False)  # Prevent DataFrame from being split across multiple pages
+pd.set_option('display.width', None)  # Use None to automatically adjust to your screen width
+
 # Load the data
 df = pd.read_csv('trainings_data.csv')
 
-# Initial data exploration
-print("First few rows of the dataset:")
-print(df.head())
+# create a new column, date_parsed, with the parsed dates
+df['date_parsed'] = pd.to_datetime(df['date'], format="%Y-%m-%d")
+print(df['date_parsed'].head())
+df.drop(['date'], axis=1, inplace=True)
+df['Year'] = df['date_parsed'].dt.year
+df['Month'] = df['date_parsed'].dt.month
+df.drop(['date_parsed'], axis=1, inplace=True)
 
-# Data types and missing values
-print("\nData types and missing value counts:")
-print(df.info())
-# Missing values
-missing_values = df.isnull().sum()
-print("\nMissing values in each column:")
-print(missing_values)
 
-# Data Preprocessing
-# Exclude unnecessary columns
+#df.head
+print(df.head)
+print(df.shape)
 df.drop(['name', 'email', 'produkt_code_pl', 'lead_id', 'kontakt_id', 'produkt_id'], axis="columns", inplace=True)
 
-# Handle missing values
-df['geschlecht'] = df['geschlecht'].fillna('Unspecified')
+df.rename(columns={'Year' : 'Jahr', 'Month' : 'Monat', 'Day' : 'Tag' , 'name' : 'Name', 'geschlecht' : 'Geschlecht', 'produkt_zeitraum_c' : 'Studientyp',
+       'produkt_art_der_ausbildung_c' : 'Studiengangsart', 'produkt_standort' : 'Studienort',
+       'produkt_fachbereich' : 'Fachbereich', 'produkt_name': 'Studiengang', 'studium_beginn' : 'Studien Beginn',
+       'product_interest_type' : 'Conversion Type', 'is_converted' : 'Konvertiert', 'has_contract' : 'Vertragsabschluss'},inplace=True)
+
+# get the number of missing data points per column
+missing_values_count = df.isnull().sum()
+print(missing_values_count)
+
+# how many total missing values do we have?
+total_cells = np.product(df.shape)
+total_missing = missing_values_count.sum()
+print(total_missing)
+print(total_cells)
+
+# percent of data that is missing
+percent_missing = (total_missing/total_cells) * 100
+print(percent_missing)
+
+print(df.info())  # Check data types
+print(df.head())
+
+df['Geschlecht'] = df['Geschlecht'].fillna('Unspecified')
+columns_to_fill = ['Fachbereich', 'Studiengang', 'Studien Beginn', 'Conversion Type']
+df[columns_to_fill] = df[columns_to_fill].fillna('Unknown')
 
 
-# Encoding categorical variables
-categorical_cols = df.select_dtypes(include=['object']).columns
-label = LabelEncoder()
-df[categorical_cols] = df[categorical_cols].apply(lambda x: label.fit_transform(x))
 
+# Label encoding for high cardinality columns
+label_encoder = LabelEncoder()
+df['Studiengang'] = df['Studiengang'].apply(lambda x: label_encoder.fit_transform([x])[0])
+
+# One-hot encoding for low cardinality columns
+df = pd.get_dummies(df, columns=['Geschlecht', 'Studientyp', 'Studiengangsart', 'Conversion Type'])
 # Splitting the dataset
-X = df.drop('has_contract', axis=1)
-y = df['has_contract']
+X = df.drop('Vertragsabschluss', axis=1)
+y = df['Vertragsabschluss']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 # Scaling features
@@ -67,6 +95,8 @@ for name, model in models.items():
     model_results[name] = accuracy  # Store results in the new dictionary
     print(f"{name} Accuracy: {accuracy}")
     print(f"Classification Report for {name}:\n", classification_report(y_test, y_pred.round()))
+
+
 
 # Identifying the best model
 best_model = max(model_results, key=model_results.get)
@@ -96,5 +126,5 @@ plt.bar(model_results.keys(), model_results.values(), color=['blue', 'green', 'r
 plt.xlabel('Models')
 plt.ylabel('Accuracy')
 plt.title('Comparison of Model Accuracies')
-plt.ylim([0.6, 0.75])
+plt.ylim([0.1, 1.0])
 plt.show()
