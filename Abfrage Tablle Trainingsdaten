@@ -1,0 +1,124 @@
+WITH lead AS (
+  SELECT
+    id as lead_id,
+    date(created_date) as date,
+    name,
+    email,
+    kontakt_c as kontakt_id,
+    geschlecht_c as geschlecht,
+    produktinteresse_c
+    
+   
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead`
+),
+product_interest AS (
+  SELECT
+    lead_c as lead_id,
+    produkt_c as produkt_id,
+    art_der_anfrage_c AS product_interest_type,
+    produkt_produktcode_c as produkt_code_pl,
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.product_interest`
+),
+product AS (
+  SELECT
+    id,
+    produktcode_c as produkt_code_p,
+
+    
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.product_2`
+),
+opportunity AS (
+  SELECT
+    kontakt_c as kontakt_id,
+    produkt_c as produkt_id,
+    studium_beginn_datum_c as studium_beginn_op,
+    produktcode_c as produktcode_op,
+    TRIM(SUBSTRING(standort_fachbereich_c, 1, STRPOS(standort_fachbereich_c, '/') - 1)) AS standort,
+    fachbereich_c,
+    IF(produktcode_c IS NOT NULL,produkt_produktname_c,null) as studiengang,
+    IF( stage_name like "%70%",true, false) as has_contract
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.opportunity`
+), 
+LEFT_JOIN_LEAD_PI aS (
+  SELECT 
+    lead.lead_id,
+    date,
+    name,
+    geschlecht,
+    email,
+    lead.kontakt_id,
+    product_interest.produkt_id,
+    produktinteresse_c,
+    product_interest_type,
+    produkt_code_pl,
+    IF(CONTAINS_SUBSTR(produkt_code_pl, "SS"), "Sommersemester","Wintersemester") as semester_type,
+    REGEXP_EXTRACT(produkt_code_pl,r'(?:SS|WS)(\d{4})') AS studium_jahr,
+  FROM lead 
+  LEFT JOIN product_interest  
+  ON lead.lead_id = product_interest.lead_id
+  GROUP BY 
+  1,2,3,4,5,6,7,8,9,10
+),
+LEFT_JOIN_LEAD_PI_PRODUCT_MATCH as(
+SELECT
+    lead_id,
+    date,
+    name,
+    email,
+    geschlecht,
+    lead_pi.kontakt_id,
+    lead_pi.produkt_id,
+    produkt_code_pl,
+    product_interest_type,
+    studium_jahr,
+    semester_type,
+    produktinteresse_c
+  FROM LEFT_JOIN_LEAD_PI  as lead_pi
+  LEFT JOIN product 
+  ON  lead_pi.produkt_id = product.id
+   GROUP BY 
+  1,2,3,4,5,6,7,8,9,10,11,12
+),
+
+LEFT_JOIN_LEAD_PI_P_OPPORTUNITY_MATCH as(
+  SELECT
+    date,
+    lead_id,
+    name,
+    email,
+    geschlecht,
+    lead_pi_p.kontakt_id,
+    lead_pi_p.produkt_id,
+    produkt_code_pl,
+    product_interest_type,
+    #semester_type,
+    #studium_jahr,
+    #produktinteresse_c,
+    studium_beginn_op,
+    produktcode_op,
+    TRIM(SPLIT(studiengang, ',')[SAFE_OFFSET(0)]) AS studium_fach,
+    TRIM(SPLIT(studiengang, ',')[SAFE_OFFSET(1)]) AS abschluss,
+    standort,
+    fachbereich_c,
+    IF(CONTAINS_SUBSTR(produktcode_op, "SS"), "Sommersemester","Wintersemester") as semester_start,
+    REGEXP_EXTRACT(produktcode_op,r'(?:SS|WS)(\d{4})') AS studium_beginn_jahr,
+    IF(lead_pi_p.produkt_id = opportunity.produkt_id, true, false) as is_converted,
+    has_contract
+  FROM LEFT_JOIN_LEAD_PI_PRODUCT_MATCH  as lead_pi_p
+  LEFT JOIN opportunity 
+  ON  lead_pi_p.kontakt_id = opportunity.kontakt_id 
+   GROUP BY 
+  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+)
+
+
+
+SELECT
+  *
+FROM
+LEFT_JOIN_LEAD_PI_P_OPPORTUNITY_MATCH
+WHERE is_converted = false
+
+
+
+

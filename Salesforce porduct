@@ -1,0 +1,19 @@
+SELECT 
+  d.id,
+  d.is_active,
+  d.is_deleted,
+  d.is_archived,
+  d.fachbereich_c,
+  d.standort_c,
+  d.zeitraum_c,
+  d.semester_produkt_c,
+  d.studium_beginn_datum_c,
+  d.bewerbung_bis_datum_c,
+  d.art_der_ausbildung_c,
+  d.titel_abschluss_c,
+  d.produktcode_c,
+  d.studiendauer_monate_c,
+  d.semesterbeitrag_c,
+  d.produktcode_nachfolgeprodukt_c
+  
+FROM `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_2` LIMIT 1000

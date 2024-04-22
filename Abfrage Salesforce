@@ -1,0 +1,24 @@
+With lead as(
+  SELECT
+  a.id,
+  a.name as name,
+  a.email as email,
+  a.kontakt_c as kontakt,
+  a.kontakt_id_c as kontakt_id,
+  a.produktinteresse_c as produktinteresse,
+  a.produktcode_c as produktcode,
+  a.produkt_datensatztyp_id_c as produkt_id
+  
+  FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead` as a
+),
+product_interest as(
+  SELECT
+ b.lead_c,
+ b.produkt_c
+ FROM `cognos-bildungsgruppe-ag.dlt_salesforce_staging.product_interest` as b
+)
+SELECT
+  *
+FROM lead a
+INNER JOIN product_interest  b  ON a.id = b.lead_c
+

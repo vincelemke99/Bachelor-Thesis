@@ -1,0 +1,20 @@
+SELECT 
+  b.id, 
+  b.status, 
+  b.is_converted,
+  b.do_not_call,
+  b.produktcode_c,
+  b.is_newsletter_c,
+  b.geschlecht_c,
+  b.email_bounced_reason,
+  b.email_bounced_date,
+  b.campus_leads_score_c,
+  b.campus_leads_beschreibung_c,
+  b.campus_leads_empfehlung_c,
+  b.campus_leads_kategorie_c,
+  b.campus_leads_status_c,
+  b.geburtsdatum_c,
+  b.letzte_lead_quelle_details_c
+
+FROM `cognos-bildungsgruppe-ag.dlt_salesforce.lead` as b
+LIMIT 1000
